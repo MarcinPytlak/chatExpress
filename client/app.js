@@ -1,9 +1,11 @@
+const socket = io();
 const loginForm = document.getElementById('welcome-form');
 const messagesSection = document.getElementById('messages-section');
 const messagesList = document.getElementById('messages-list');
 const addMessageForm = document.getElementById('add-messages-form');
 const userNameInput = document.getElementById('username');
 const messageContentInput = document.getElementById('message-content');
+
 
 let userName = '';
 
@@ -18,7 +20,10 @@ loginForm.addEventListener('submit', function login(event){
     };
 });
 
+socket.on('message', ({ author, content }) => addMessage(author, content));
+
 function addMessage(author, content){
+    console.log(author, content);
     const message = document.createElement('li');
     message.classList.add('message');
     message.classList.add('message--received');
@@ -30,15 +35,17 @@ function addMessage(author, content){
         ${content}
         </div>`;
         messagesList.appendChild(message);
-    }
-}
+    };
+};
 
 addMessageForm.addEventListener('submit', function sendMessage(event){
     event.preventDefault();
-    if(messageContentInput.value.length == 0){
+    let messageContent = messageContentInput.value;
+    if(!messageContent.length){
         alert('Enter message');
     } else {
-        addMessage(userName, messageContentInput.value);
+        addMessage(userName, messageContent);
+        socket.emit('message', { author: userName, content: messageContent})
         messageContentInput.value = '';
     };
 });
